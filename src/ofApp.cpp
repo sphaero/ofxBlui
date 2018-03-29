@@ -85,7 +85,6 @@ void ofApp::draw(){
 void ofApp::buttonPressed(int item, UIevent event)
 {
     ofLogNotice() << item << ":" << event;
-    ofLogError() << this->col;
 }
 
 void ofApp::playPressed(int item, UIevent event)
