@@ -6,6 +6,36 @@
 #include "blendish.h"
 #include "oui.h"
 
+/*** helpers to use CPP members as C callbacks
+ *
+ * This is really some advanced cpp shit. I can hardly grasp what it is doing
+ * but in the end it just converts a member method to a c callback pointer
+ *
+ * This comes from many examples on SO and code from ofEvents (openFrameworks)
+ */
+template <typename T>
+struct Callback;
+
+template <typename Ret, typename... Params>
+struct Callback<Ret(Params...)> {
+    template <typename... Args>
+    static Ret callback(Args... args) { return func(args...); }
+    static std::function<Ret(Params...)> func;
+};
+
+// Initialize the static member.
+template <typename Ret, typename... Params>
+std::function<Ret(Params...)> Callback<Ret(Params...)>::func;
+
+template <class InstanceClass>
+UIhandler ofxBluiCptr(InstanceClass  * instance, void (InstanceClass::*instanceMethod)(int, UIevent))
+{
+    Callback<void(int, UIevent)>::func = std::bind( instanceMethod, instance, std::placeholders::_1, std::placeholders::_2 );
+    void (*c_func)(int, UIevent) = static_cast<decltype(c_func)>(Callback<void(int, UIevent)>::callback);
+    return c_func;
+}
+// end helpers
+
 class ofxBlui
 {
 public:
@@ -97,6 +127,14 @@ public:
     void init(NVGcontext *vg);
     int label(int iconid, const char *label);
     int button(int iconid, const char *label, UIhandler handler);
+    // because of the template this needs to be implemented in the header https://stackoverflow.com/questions/10632251/undefined-reference-to-template-function
+    template <class InstanceClass>
+    int button(int iconid, const char *label, InstanceClass* instance, void (InstanceClass::*instanceMethod)(int, UIevent))
+    {
+        UIhandler handler = ofxBluiCptr(instance, instanceMethod);
+        return button(iconid, label, handler);
+    }
+
     int check(const char *label, int *option);
     int slider(const char *label, float *progress);
     int textbox(char *text, int maxsize);

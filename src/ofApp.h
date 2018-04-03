@@ -31,6 +31,6 @@ public:
     float progress2;
     int enum1;
 
-    static void buttonPressed(int item, UIevent event);
+    void buttonPressed(int item, UIevent event);
     static void playPressed(int item, UIevent event);
 };

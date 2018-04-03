@@ -1,5 +1,20 @@
 #include "ofApp.h"
 
+/*
+template <typename T>
+struct Callback;
+
+template <typename Ret, typename... Params>
+struct Callback<Ret(Params...)> {
+    template <typename... Args>
+    static Ret callback(Args... args) { return func(args...); }
+    static std::function<Ret(Params...)> func;
+};
+
+// Initialize the static member.
+template <typename Ret, typename... Params>
+std::function<Ret(Params...)> Callback<Ret(Params...)>::func;
+*/
 //--------------------------------------------------------------
 void ofApp::setup(){
     //blui = ofxBlui();
@@ -27,9 +42,11 @@ void ofApp::setup(){
     uiSetLayout(col, UI_TOP|UI_HFILL);
 
     //add buttons
-    blui.column_append(col, blui.button(BND_ICON_GHOST, "Ghost 1", buttonPressed));
-    blui.column_append(col, blui.button(BND_ICON_HELP, "Ghost 2", buttonPressed));
-    blui.column_append(col, blui.button(BND_ICON_COLOR, "Ghost 3", buttonPressed));
+    // converting a member to c pointer using ofxBluiCptr
+    blui.column_append(col, blui.button(BND_ICON_GHOST, "Ghost 1", ofxBluiCptr(this, &ofApp::buttonPressed )));
+    // by using a cpp wrapper around C callbacks
+    blui.column_append(col, blui.button(BND_ICON_HELP, "Ghost 2", this, &ofApp::buttonPressed ));
+    blui.column_append(col, blui.button(BND_ICON_COLOR, "Ghost 3", this, &ofApp::buttonPressed ));
 
     // add button group
     progress1 = 0.25f;
@@ -67,7 +84,6 @@ void ofApp::setup(){
     blui.column_append(col, blui.textbox(txt, 100));
 
     uiEndLayout();
-
 }
 
 //--------------------------------------------------------------
